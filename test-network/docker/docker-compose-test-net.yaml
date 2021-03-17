@@ -9,9 +9,11 @@ volumes:
   orderer.example.com:
   peer0.org1.example.com:
   peer0.org2.example.com:
+  peer0.org3.example.com:
+  peer0.org4.example.com:
 
 networks:
-  test:
+  example:
 
 services:
 
@@ -46,7 +48,7 @@ services:
     ports:
       - 7050:7050
     networks:
-      - test
+      - example
 
   peer0.org1.example.com:
     container_name: peer0.org1.example.com
@@ -57,12 +59,13 @@ services:
       # the following setting starts chaincode containers on the same
       # bridge network as the peers
       # https://docs.docker.com/compose/networking/
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_test
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_example
       - FABRIC_LOGGING_SPEC=INFO
       #- FABRIC_LOGGING_SPEC=DEBUG
       - CORE_PEER_TLS_ENABLED=true
       - CORE_PEER_PROFILE_ENABLED=true
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
       # Peer specific variabes
@@ -78,13 +81,15 @@ services:
         - /var/run/:/host/var/run/
         - ../organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/fabric/msp
         - ../organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/etc/hyperledger/fabric/tls
+        - ../organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.crt:/etc/hyperledger/fabric/tls/server.crt
+        - ../organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.key:/etc/hyperledger/fabric/tls/server.key
         - peer0.org1.example.com:/var/hyperledger/production
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
     ports:
       - 7051:7051
     networks:
-      - test
+      - example
 
   peer0.org2.example.com:
     container_name: peer0.org2.example.com
@@ -95,7 +100,7 @@ services:
       # the following setting starts chaincode containers on the same
       # bridge network as the peers
       # https://docs.docker.com/compose/networking/
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_test
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_example
       - FABRIC_LOGGING_SPEC=INFO
       #- FABRIC_LOGGING_SPEC=DEBUG
       - CORE_PEER_TLS_ENABLED=true
@@ -116,10 +121,127 @@ services:
         - /var/run/:/host/var/run/
         - ../organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/etc/hyperledger/fabric/msp
         - ../organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls:/etc/hyperledger/fabric/tls
+        - ../organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/server.crt:/etc/hyperledger/fabric/tls/server.crt
+        - ../organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/server.key:/etc/hyperledger/fabric/tls/server.key
         - peer0.org2.example.com:/var/hyperledger/production
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
     ports:
       - 9051:9051
     networks:
-      - test
+      - example
+
+  peer0.org3.example.com:
+    container_name: peer0.org3.example.com
+    image: hyperledger/fabric-peer:$IMAGE_TAG
+    environment:
+      #Generic peer variables
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      # the following setting starts chaincode containers on the same
+      # bridge network as the peers
+      # https://docs.docker.com/compose/networking/
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_example
+      - FABRIC_LOGGING_SPEC=INFO
+      #- FABRIC_LOGGING_SPEC=DEBUG
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      # Peer specific variabes
+      - CORE_PEER_ID=peer0.org3.example.com
+      - CORE_PEER_ADDRESS=peer0.org3.example.com:6051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:6051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.org3.example.com:6052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:6052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org3.example.com:6051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org3.example.com:6051
+      - CORE_PEER_LOCALMSPID=Org3MSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp:/etc/hyperledger/fabric/msp
+        - ../organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls:/etc/hyperledger/fabric/tls
+        - ../organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/server.crt:/etc/hyperledger/fabric/tls/server.crt
+        - ../organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/server.key:/etc/hyperledger/fabric/tls/server.key
+        - peer0.org3.example.com:/var/hyperledger/production
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    ports:
+      - 6051:6051
+    networks:
+      - example
+
+  peer0.org4.example.com:
+    container_name: peer0.org4.example.com
+    image: hyperledger/fabric-peer:$IMAGE_TAG
+    environment:
+      #Generic peer variables
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      # the following setting starts chaincode containers on the same
+      # bridge network as the peers
+      # https://docs.docker.com/compose/networking/
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_example
+      - FABRIC_LOGGING_SPEC=INFO
+      #- FABRIC_LOGGING_SPEC=DEBUG
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      # Peer specific variabes
+      - CORE_PEER_ID=peer0.org4.example.com
+      - CORE_PEER_ADDRESS=peer0.org4.example.com:5051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:5051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.org4.example.com:5052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:5052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org4.example.com:5051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org4.example.com:5051
+      - CORE_PEER_LOCALMSPID=Org4MSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/msp:/etc/hyperledger/fabric/msp
+        - ../organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls:/etc/hyperledger/fabric/tls
+        - ../organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls/server.crt:/etc/hyperledger/fabric/tls/server.crt
+        - ../organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls/server.key:/etc/hyperledger/fabric/tls/server.key
+        - peer0.org4.example.com:/var/hyperledger/production
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    ports:
+      - 5051:5051
+    networks:
+      - example
+
+
+  cli-org1:
+   container_name: cli-org1
+   image: hyperledger/fabric-tools:$IMAGE_TAG
+   tty: true
+   stdin_open: true
+   environment:
+     - GOPATH=/opt/gopath
+     - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+     - FABRIC_LOGGING_SPEC=DEBUG
+     - CORE_PEER_ID=cli-org1
+     - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+     - CORE_PEER_LOCALMSPID=Org1MSP
+     - CORE_PEER_TLS_ENABLED=true
+     - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+     - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
+   working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+   command: sh
+   volumes:
+    - /var/run/:/host/var/run/
+    - ../organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/fabric/msp
+    - ../organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/etc/hyperledger/fabric/tls
+    - ../organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls:/etc/hyperledger/fabric/tls
+    - ../organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls:/etc/hyperledger/fabric/tls
+    - ../organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls:/etc/hyperledger/fabric/tls
+    - ../organizations/:/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations
+   depends_on:
+    - peer0.org1.example.com
+    - orderer.example.com
+    - peer0.org2.example.com
+    - peer0.org3.example.com
+    - peer0.org4.example.com
+   networks:
+     - example

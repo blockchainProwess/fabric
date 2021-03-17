@@ -1,0 +1,146 @@
+cli:
+    container_name: cli
+    image: hyperledger/fabric-tools
+    tty: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=DEBUG
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    #command: /bin/bash -c './scripts/script.sh ${CHANNEL_NAME} ${DELAY}; sleep $TIMEOUT'
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./../chaincode/:/opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode/go
+        - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+        - ./scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
+        - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+    depends_on:
+      - orderer.example.com
+      - peer0.org1.example.com
+      - peer1.org1.example.com
+      - peer0.org2.example.com
+      - peer1.org2.example.com
+    networks:
+      - byfn
+
+peer chaincode query -C mychannel -n basic -c '{"Args":["queryAllCars"]}' >log.txt
+
+peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n scmcc  -c '{"Args":["initLedger"]}' -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+
+----------------------------------------------------------#############################################-----------------------------------------------------------------------------------------------------------
+
+
+peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n scmcc -c '{"Args":["initLedger"]}' --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+--peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+--peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+--peerAddresses peer0.org3.example.com:6051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt \
+--peerAddresses peer0.org4.example.com:5051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls/ca.crt
+
+peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n scmcc -c '{"function":"initAssetID","Args":[]}' --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+--peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+--peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+--peerAddresses peer0.org3.example.com:6051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt \
+--peerAddresses peer0.org4.example.com:5051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls/ca.crt
+
+peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n scmcc -c '{"function":"recordProducerTransaction","Args":["001_BLF_2011021_2011021","100","10","01-01-2020","01-02-2020","X Farming","Farm","India","Shrimp","02-02-2020","03-03-2020", "Jack"]}' --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+--peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+--peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+--peerAddresses peer0.org3.example.com:6051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt \
+--peerAddresses peer0.org4.example.com:5051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls/ca.crt
+
+peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n scmcc -c '{"Args":["queryAllTransactions","",""]}' --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+--peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+--peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+--peerAddresses peer0.org3.example.com:6051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt \
+--peerAddresses peer0.org4.example.com:5051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls/ca.crt
+
+
+docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp" -e "CORE_PEER_ADDRESS=peer0.org1.example.com:7051" cli-org1 peer chaincode query -C mychannel -n scmcc -c '{"function":"initLedger","Args":[]}' -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+'{"function":"initAssetID","Args":[]}'
+docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp" -e "CORE_PEER_ADDRESS=peer0.org1.example.com:7051" cli-org1 peer chaincode query -C mychannel -n scmcc -c '{"Args":["queryAssetID","PrAssetID"]}' -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp" -e "CORE_PEER_ADDRESS=peer0.org1.example.com:7051" cli-org1 peer chaincode query -C mychannel -n basic -c '{"Args":["GetAllAssets"]}'
+
+ReadAsset
+
+
+docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp" -e "CORE_PEER_ADDRESS=peer0.org1.example.com:7051" cli-org1 peer chaincode query -C mychannel -n basic -c '{"Args":["ReadAsset", "asset1"]}'
+
+docker exec -e "CORE_PEER_MSPCONFIGPATH=/tmp/hyperledger/org2/admin/msp" -e "CORE_PEER_ADDRESS=peer2-org2:7051" cli-org2 peer chaincode instantiate -C mychannel -n mycc -v 1.0 -c '{"Args":["a","10"]}' -o orderer1-org0:7050 --tls --cafile /tmp/hyperledger/org2/peer1/tls-msp/tlscacerts/tls-0-0-0-0-7052.pem
+fabric-samples/test-network/organizations/ordererOrganizations/example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp" -e "CORE_PEER_ADDRESS=peer0.org1.example.com:7051" cli-org1 peer chaincode query -C mychannel -n scmcc -c '{"function":"recordProducerTransaction","Args":["CTF_204281","100","10","01-01-2020","01-02-2020","X Farming","Farm","India","Shrimp","02-02-2020","03-03-2020"]}' -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+queryTransaction
+
+docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp" -e "CORE_PEER_ADDRESS=peer0.org1.example.com:7051" cli-org1 peer chaincode query -C mychannel -n scmc -c '{"function":"queryTransaction","Args":["ASID002"]}' -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+
+
+
+---------------------------------------------------------#####################################--------------------------------------
+
+peer chaincode invoke -o orderer.example.com:7050 -C farmingchannel -n vscm -c '{"Args":["initLedger"]}' --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+--peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+--peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+--peerAddresses peer0.org3.example.com:6051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt \
+--peerAddresses peer0.org4.example.com:5051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls/ca.crt
+
+
+peer chaincode invoke -o orderer.example.com:7050 -C farmingchannel -n vscm -c '{"function":"initAssetID","Args":[]}' --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+--peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+--peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+--peerAddresses peer0.org3.example.com:6051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt \
+--peerAddresses peer0.org4.example.com:5051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls/ca.crt
+
+peer chaincode invoke -o orderer.example.com:7050 -C farmingchannel -n vscm -c '{"function":"recordProducerTransaction","Args":["001_BLF_2011021_2011021","100","10","01-01-2020","01-02-2020","X Farming","Farm","India","Shrimp","02-02-2020","03-03-2020", "xxx", "xxxx", "Xxxx", "Daniel"]}' --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+--peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+--peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+--peerAddresses peer0.org3.example.com:6051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt \
+--peerAddresses peer0.org4.example.com:5051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls/ca.crt
+
+
+peer chaincode invoke -o orderer.example.com:7050 -C farmingchannel -n vscm -c '{"Args":["queryAllTransactions","",""]}' --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+--peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+--peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+--peerAddresses peer0.org3.example.com:6051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt \
+--peerAddresses peer0.org4.example.com:5051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls/ca.crt
+
+
+--------------------------------------------------------------########################################-------------------------------------------------------------------------------------------------------------------------------
+
+peer chaincode invoke -o orderer.example.com:7050 -C cropchannel -n fscm -c '{"Args":["initLedger"]}' --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+--peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+--peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+--peerAddresses peer0.org3.example.com:6051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt \
+--peerAddresses peer0.org4.example.com:5051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls/ca.crt
+
+
+peer chaincode invoke -o orderer.example.com:7050 -C cropchannel -n fscm -c '{"function":"initAssetID","Args":[]}' --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+--peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+--peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+--peerAddresses peer0.org3.example.com:6051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt \
+--peerAddresses peer0.org4.example.com:5051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls/ca.crt
+
+peer chaincode invoke -o orderer.example.com:7050 -C cropchannel -n fscm -c '{"function":"recordProducerTransaction","Args":["001_BLF_2011021_2011021","100","10","01-01-2020","01-02-2020","X Farming","Farm","India","Shrimp","02-02-2020","03-03-2020", "Dowell"]}' --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+--peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+--peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+--peerAddresses peer0.org3.example.com:6051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt \
+--peerAddresses peer0.org4.example.com:5051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls/ca.crt
+
+
+peer chaincode invoke -o orderer.example.com:7050 -C cropchannel -n fscm -c '{"Args":["queryAllTransactions","",""]}' --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+--peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+--peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+--peerAddresses peer0.org3.example.com:6051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt \
+--peerAddresses peer0.org4.example.com:5051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls/ca.crt
+

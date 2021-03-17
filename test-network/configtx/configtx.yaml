@@ -63,7 +63,7 @@ Organizations:
                 Rule: "OR('Org1MSP.admin', 'Org1MSP.peer', 'Org1MSP.client')"
             Writers:
                 Type: Signature
-                Rule: "OR('Org1MSP.admin', 'Org1MSP.client')"
+                Rule: "OR('Org1MSP.member', 'Org1MSP.client')"
             Admins:
                 Type: Signature
                 Rule: "OR('Org1MSP.admin')"
@@ -98,7 +98,7 @@ Organizations:
                 Rule: "OR('Org2MSP.admin', 'Org2MSP.peer', 'Org2MSP.client')"
             Writers:
                 Type: Signature
-                Rule: "OR('Org2MSP.admin', 'Org2MSP.client')"
+                Rule: "OR('Org2MSP.member', 'Org2MSP.client')"
             Admins:
                 Type: Signature
                 Rule: "OR('Org2MSP.admin')"
@@ -112,6 +112,74 @@ Organizations:
             # encoded in the genesis block in the Application section context
             - Host: peer0.org2.example.com
               Port: 9051
+
+    - &Org3
+        # DefaultOrg defines the organization which is used in the sampleconfig
+        # of the fabric.git development environment
+        Name: Org3MSP
+
+        # ID to load the MSP definition as
+        ID: Org3MSP
+
+        MSPDir: ../organizations/peerOrganizations/org3.example.com/msp
+
+        # Policies defines the set of policies at this level of the config tree
+        # For organization policies, their canonical path is usually
+        #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('Org3MSP.admin', 'Org3MSP.peer', 'Org3MSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('Org3MSP.member', 'Org3MSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('Org3MSP.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('Org3MSP.peer')"
+
+        AnchorPeers:
+            # AnchorPeers defines the location of peers which can be used
+            # for cross org gossip communication.  Note, this value is only
+            # encoded in the genesis block in the Application section context
+            - Host: peer0.org3.example.com
+              Port: 6051
+
+    - &Org4
+        # DefaultOrg defines the organization which is used in the sampleconfig
+        # of the fabric.git development environment
+        Name: Org4MSP
+
+        # ID to load the MSP definition as
+        ID: Org4MSP
+
+        MSPDir: ../organizations/peerOrganizations/org4.example.com/msp
+
+        # Policies defines the set of policies at this level of the config tree
+        # For organization policies, their canonical path is usually
+        #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('Org4MSP.admin', 'Org4MSP.peer', 'Org4MSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('Org4MSP.member', 'Org4MSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('Org4MSP.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('Org4MSP.peer')"
+
+        AnchorPeers:
+            # AnchorPeers defines the location of peers which can be used
+            # for cross org gossip communication.  Note, this value is only
+            # encoded in the genesis block in the Application section context
+            - Host: peer0.org4.example.com
+              Port: 5051
 
 ################################################################################
 #
@@ -195,13 +263,13 @@ Application: &ApplicationDefaults
             Rule: "ANY Writers"
         Admins:
             Type: ImplicitMeta
-            Rule: "MAJORITY Admins"
+            Rule: "ANY Admins"
         LifecycleEndorsement:
             Type: ImplicitMeta
-            Rule: "MAJORITY Endorsement"
+            Rule: "ANY Endorsement"
         Endorsement:
             Type: ImplicitMeta
-            Rule: "MAJORITY Endorsement"
+            Rule: "ANY Endorsement"
 
     Capabilities:
         <<: *ApplicationCapabilities
@@ -329,6 +397,9 @@ Profiles:
                 Organizations:
                     - *Org1
                     - *Org2
+                    - *Org3
+                    - *Org4
+
     TwoOrgsChannel:
         Consortium: SampleConsortium
         <<: *ChannelDefaults
@@ -337,5 +408,34 @@ Profiles:
             Organizations:
                 - *Org1
                 - *Org2
+                - *Org3
+                - *Org4
+            Capabilities:
+                <<: *ApplicationCapabilities
+
+    FarmingChannel:
+        Consortium: SampleConsortium
+        <<: *ChannelDefaults
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Org1
+                - *Org2
+                - *Org3
+                - *Org4
+            Capabilities:
+                <<: *ApplicationCapabilities
+
+
+    CropChannel:
+        Consortium: SampleConsortium
+        <<: *ChannelDefaults
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Org1
+                - *Org2
+                - *Org3
+                - *Org4
             Capabilities:
                 <<: *ApplicationCapabilities
